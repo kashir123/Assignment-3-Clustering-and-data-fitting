@@ -54,6 +54,53 @@ def remove_extra_indicators(df, indicators):
     
     return filtered_dataset
 
+
+def bar_chart(df,labels):
+    
+    """
+    This function is use to print the bar chart it takes dataset as input and
+    labels
+    
+    """
+    #countries list which we have to plot a bar chart
+    countries_list = [
+        "India",
+        "China",
+        "Italy",
+        "France",
+        "Israel",
+        "United Kingdom",
+        "Finland",
+        "Japan",
+        "United States"
+        ]
+    
+    temp = df.reset_index()
+    
+    temp2 = temp[temp["Country Name"].isin(countries_list)]
+    # Set the number of rows and columns for the subplot grid
+    n_rows = int(len(labels)/2)
+    n_cols = 2
+    
+    # Create the figure and subplots using plt.subplots()
+    fig, axs = plt.subplots(n_rows, n_cols, figsize=(15, 30))
+    
+    # Flatten the array of subplots to simplify indexing
+    axs = axs.flatten()
+    
+    # Loop over the labels and create a bar chart for each one
+    for i, label in enumerate(labels):
+        temp3 = temp2[["Country Name", label]].set_index("Country Name")
+        temp3 = temp3.sort_values(by=label, ascending=True)
+        ax = axs[i]
+        temp3.plot(kind="bar", ax=ax)
+        ax.set_title(label)
+    
+    # Use tight_layout to adjust the spacing between subplots
+    plt.tight_layout()
+    plt.show()
+    
+    
 if __name__=="__main__":
     #read dataset by calling the function
     df, countries = read_dataset("dataset.csv")
@@ -91,10 +138,12 @@ if __name__=="__main__":
                                        , columns='Indicator Name'
                                        , values='2020')
     
+    print(pivot_dataset.head())
+    bar_chart(pivot_dataset, indicators_list)
     # Correlation
     corr = pivot_dataset.corr()
     mask = np.triu(np.ones_like(corr, dtype=bool))
-    sns.heatmap(corr, mask=mask, cmap='coolwarm', annot=True, fmt='.2f', xticklabels=indicator_list_short, yticklabels=indicator_list_short)
+    #sns.heatmap(corr, mask=mask, cmap='coolwarm', annot=True, fmt='.2f', xticklabels=indicator_list_short, yticklabels=indicator_list_short)
    
-    plt.title('Correlation between environmental factors')
-    plt.show()
+    #plt.title('Correlation between environmental factors')
+    #plt.show()
