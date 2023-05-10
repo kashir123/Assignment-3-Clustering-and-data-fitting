@@ -15,41 +15,86 @@ from scipy.optimize import curve_fit
 from sklearn.preprocessing import StandardScaler
 
 
-# Define a function that reads World Bank data from a CSV file and returns two dataframes:
-def read_worldbank_data(filename):
+def read_dataset(filename):
     """
-    Function is used to load the data and then it convert it into two formats
-    One is year as columns and other is country name as column.
     
-    Parameter:
-        filename: Name of the data file.
-    
-    Returns:
-        years: Dataframe with years as column
-        countries: Dataframe with country names as column
+    This function load dataset from same directory and transpose in and return
+    two dataset one year as column and second country name
         
     """
     
-    # Read the CSV file and skip the first 4 rows
+    # Read csv and skip garbage values which is in first 4 rows
     df = pd.read_csv(filename, skiprows=4)
     
-    # Drop unnecessary columns
-    df = df.iloc[:, :-1]
+    # Drop unnamed column
+    df = df.iloc[:,:-2]
     
-    # Create a copy of the dataset with years as columns
-    years = df.copy()
     
     # Create a dataset with countries as columns
-    countries = df.set_index(["Country Name", "Indicator Name"])
-    countries.drop(["Country Code", "Indicator Code"], axis=1, inplace=True)
+    by_countries = df.set_index(["Country Name", "Indicator Name"])
+    by_countries.drop(["Country Code", "Indicator Code"], axis=1, inplace=True)
     
     # Transpose the countries dataframe
-    countries = countries.T
+    by_countries = by_countries.T
     
     # Return the years and countries dataframes
-    return years, countries
+    return df, by_countries
+
+
+def remove_extra_indicators(df, indicators):
+    """
+    This function is use to return only data data set with those indicators
+    which we will used in our project
+    
+    """
+    
+    # This will return dataset with those indicator which we need to use
+    filtered_dataset = df[df["Indicator Name"].isin(indicators)]
+    
+    
+    return filtered_dataset
 
 if __name__=="__main__":
-    df, countries = read_worldbank_data("dataset.csv")
-    print("df",df.head())
-    print("countries",countries)
+    #read dataset by calling the function
+    df, countries = read_dataset("dataset.csv")
+    
+    #list of indicators which we need for our analysis
+    indicators_list = [
+    'Agricultural land (% of land area)',
+    'Forest area (% of land area)',
+    'CO2 emissions (kt)',
+    'Methane emissions (kt of CO2 equivalent)',
+    'Nitrous oxide emissions (thousand metric tons of CO2 equivalent)',
+    'Total greenhouse gas emissions (kt of CO2 equivalent)',
+    'Renewable electricity output (% of total electricity output)',
+    'Renewable energy consumption (% of total final energy consumption)',
+    ]
+    indicator_list_short = [
+        'Agricultural land ',
+        'Forest area ',
+        'CO2 emissions (kt)',
+        'Methane emissions',
+        'Nitrous oxide emissions',
+        'Total greenhouse gas emissions',
+        'Renewable electricity output',
+        'Renewable energy consumption',
+        ]
+    # getting only those data 
+    filtered_dataset = remove_extra_indicators(df, indicators_list)
+    
+    #clean dataset by filling missing values
+    filtered_dataset = filtered_dataset.fillna(method="ffill")\
+        .fillna(method="bfill")
+    
+    # Pivot the dataset to get the values by indicator name with country name
+    pivot_dataset = filtered_dataset.pivot_table(index='Country Name'
+                                       , columns='Indicator Name'
+                                       , values='2020')
+    
+    # Correlation
+    corr = pivot_dataset.corr()
+    mask = np.triu(np.ones_like(corr, dtype=bool))
+    sns.heatmap(corr, mask=mask, cmap='coolwarm', annot=True, fmt='.2f', xticklabels=indicator_list_short, yticklabels=indicator_list_short)
+   
+    plt.title('Correlation between environmental factors')
+    plt.show()
