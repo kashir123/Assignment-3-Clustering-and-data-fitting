@@ -291,7 +291,7 @@ if __name__=="__main__":
     mask = np.triu(np.ones_like(corr, dtype=bool))
     sns.heatmap(corr, mask=mask, cmap='coolwarm', annot=True, fmt='.2f', xticklabels=indicator_list_short, yticklabels=indicator_list_short)
    
-    plt.title('Correlation between environmental factors')
+    plt.title('Correlation between different indicators')
     plt.show()
    
     #clustering with 3
