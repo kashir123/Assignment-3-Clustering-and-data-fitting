@@ -218,9 +218,9 @@ def fitting_function(x_data, y_data, linear_func, sigma=[1.0, 1.0]):
     plt.plot(x_data, y_data, label='Data')
     plt.plot(x_pred, y_pred, 'r-', label='Linear Fit')
     plt.legend(loc='right')
-    plt.title("Population Prediction")
-    plt.xlabel('Year')
-    plt.ylabel('Total Population')
+    plt.title("Population Prediction", fontsize = 15)
+    plt.xlabel('Year', fontsize = 15)
+    plt.ylabel('Total Population', fontsize = 15)
     plt.show()
     
 
@@ -270,16 +270,20 @@ if __name__=="__main__":
     'CO2 emissions (kt)': 'CO2 emissions',
     'Forest area (% of land area)': 'Forest area',
     'Methane emissions (kt of CO2 equivalent)': 'Methane emissions',
-    'Nitrous oxide emissions (thousand metric tons of CO2 equivalent)': 'Nitrous oxide emissions',
-    'Total greenhouse gas emissions (kt of CO2 equivalent)': 'Total GHG emissions',
-    'Renewable electricity output (% of total electricity output)':'Renewable electricity',
-    'Renewable energy consumption (% of total final energy consumption)':'Renewable energy',
+    'Nitrous oxide emissions (thousand metric tons of CO2 equivalent)'\
+        : 'Nitrous oxide emissions',
+    'Total greenhouse gas emissions (kt of CO2 equivalent)'\
+        : 'Total GHG emissions',
+    'Renewable electricity output (% of total electricity output)'\
+        :'Renewable electricity',
+    'Renewable energy consumption (% of total final energy consumption)'\
+        :'Renewable energy',
     }
     
     #rename labels to shortened the name to prevent label collapse
     pivot_dataset_scatter = pivot_dataset.rename(columns=label_dict)
     
-    # scatter plot
+    # scatter matrix plot
     pd.plotting.scatter_matrix(pivot_dataset_scatter, figsize=(15.0, 15.0))
     plt.tight_layout()    # helps to avoid overlap of labels
     plt.xticks(rotation=90)
@@ -289,7 +293,9 @@ if __name__=="__main__":
     # Correlation
     corr = pivot_dataset.corr()
     mask = np.triu(np.ones_like(corr, dtype=bool))
-    sns.heatmap(corr, mask=mask, cmap='coolwarm', annot=True, fmt='.2f', xticklabels=indicator_list_short, yticklabels=indicator_list_short)
+    sns.heatmap(corr, mask=mask, cmap='coolwarm', annot=True, fmt='.2f'
+                , xticklabels=indicator_list_short
+                , yticklabels=indicator_list_short)
    
     plt.title('Correlation between different indicators')
     plt.show()
@@ -299,21 +305,21 @@ if __name__=="__main__":
     
     #scatter plot with cluster  3
     scatter_plot_for_clustered_data(clustered_dataset
-                                    ,'Forest area (% of land area)'
-                                    ,'CO2 emissions (kt)'
-                                    ,'Total greenhouse gas emissions (kt of CO2 equivalent)'
-                                    ,'CO2 emissions (kt)'
-                                    ,'CO2 emission vs Greenhouse emission by 3 clusters')
+                    ,'Forest area (% of land area)'
+                    ,'CO2 emissions (kt)'
+                    ,'Forest area (% of land area)'
+                    ,'CO2 emissions (kt)'
+                    ,'CO2 emission vs Forest area by 3 clusters')
     #clustering with 4
     clustered_dataset_four = clustering_function(pivot_dataset,4)
     
     #scatter plot with cluster 4
     scatter_plot_for_clustered_data(clustered_dataset_four
-                                    ,'Forest area (% of land area)'
-                                    ,'CO2 emissions (kt)'
-                                    ,'Total greenhouse gas emissions (kt of CO2 equivalent)'
-                                    ,'CO2 emissions (kt)'
-                                    ,'CO2 emission vs Greenhouse emission by 4 clusters')
+                    ,'Forest area (% of land area)'
+                    ,'CO2 emissions (kt)'
+                    ,'Forest area (% of land area)'
+                    ,'CO2 emissions (kt)'
+                    ,'CO2 emission vs Forest area 4 clusters')
     
     
     #fitting
