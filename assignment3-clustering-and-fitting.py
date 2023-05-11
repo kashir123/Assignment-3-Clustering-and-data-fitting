@@ -128,6 +128,12 @@ def clustering_function(dataset,number_of_cluster):
 
 def scatter_plot_for_clustered_data(df,x,y,xLabel,yLabel,title):
     
+    """
+    This function is used to plot the scatter it takes dataset, x,y values and 
+    labels and title for the scvatter plot graph
+    
+    """
+    
     # Create a scatter plot with the specified columns and labels
     plt.figure(figsize=(10, 5))
     plt.scatter(df[x],
@@ -141,8 +147,83 @@ def scatter_plot_for_clustered_data(df,x,y,xLabel,yLabel,title):
     
     # Show the plot
     plt.show()
+
+
+def err_ranges(x, func, param, sigma):
+    """
+    Calculates the upper and lower limits for the function, parameters and
+    sigmas for single value or array x. Functions values are calculated for 
+    all combinations of +/- sigma and the minimum and maximum is determined.
+    Can be used for all number of parameters and sigmas >=1.
     
+    This routine can be used in assignment programs.
+    """
+
+    import itertools as iter
     
+    # initiate arrays for lower and upper limits
+    lower = func(x, *param)
+    upper = lower
+    
+    uplow = []   # list to hold upper and lower limits for parameters
+    for p, s in zip(param, sigma):
+        pmin = p - s
+        pmax = p + s
+        uplow.append((pmin, pmax))
+        
+    pmix = list(iter.product(*uplow))
+    
+    for p in pmix:
+        y = func(x, *p)
+        lower = np.minimum(lower, y)
+        upper = np.maximum(upper, y)
+        
+    return lower, upper   
+
+def linfunc(x, a, b):
+    """ Function for fitting
+        x: independent variable
+        a, b: parameters to be fitted
+    """
+    
+    y = a*x + b
+    
+    return y
+    
+def fitting_function(x_data, y_data, linear_func, sigma=[1.0, 1.0]):
+    """
+     This function perform fitting and after fitting it draw the graph on it
+     it takes x and y axis data which is used in our fitting and third 
+     parameter is linear function which is our fitting model
+     
+    """
+    # do the fitting 
+    #curve fittting
+    popt, pcov = curve_fit(linear_func, x_data, y_data)
+    
+    # define points for the linear function
+    x_pred = np.arange(2020, 2042)
+
+    # generate y values for the predicted years using the model function
+    y_pred = linear_func(x_pred, *popt)
+    
+    # generate upper and lower limit for the model
+    lower, upper = err_ranges(x_pred, linear_func, popt, sigma)
+    
+    print("Predictions for the next 20 years is")
+    print(y_pred)
+    
+    # plot the model function actual and predictions 
+    plt.figure(figsize=(15, 8))
+    plt.plot(x_data, y_data, label='Data')
+    plt.plot(x_pred, y_pred, 'r-', label='Linear Fit')
+    plt.legend(loc='right')
+    plt.title("Population Prediction")
+    plt.xlabel('Year')
+    plt.ylabel('Total Population')
+    plt.show()
+    
+
 if __name__=="__main__":
     #read dataset by calling the function
     df, countries = read_dataset("dataset.csv")
@@ -181,7 +262,7 @@ if __name__=="__main__":
                                        , values='2020')
     
     
-    #bar_chart(pivot_dataset, indicators_list)
+    bar_chart(pivot_dataset, indicators_list)
     
     #make dictionary to make label short
     label_dict = {
@@ -197,7 +278,7 @@ if __name__=="__main__":
     
     #rename labels to shortened the name to prevent label collapse
     pivot_dataset_scatter = pivot_dataset.rename(columns=label_dict)
-    '''
+    
     # scatter plot
     pd.plotting.scatter_matrix(pivot_dataset_scatter, figsize=(15.0, 15.0))
     plt.tight_layout()    # helps to avoid overlap of labels
@@ -212,7 +293,7 @@ if __name__=="__main__":
    
     plt.title('Correlation between environmental factors')
     plt.show()
-    '''
+   
     #clustering with 3
     clustered_dataset = clustering_function(pivot_dataset,3)
     
@@ -222,7 +303,7 @@ if __name__=="__main__":
                                     ,'CO2 emissions (kt)'
                                     ,'Total greenhouse gas emissions (kt of CO2 equivalent)'
                                     ,'CO2 emissions (kt)'
-                                    ,'CO2 emission vs Greenhouse emission by Cluster')
+                                    ,'CO2 emission vs Greenhouse emission by 3 clusters')
     #clustering with 4
     clustered_dataset_four = clustering_function(pivot_dataset,4)
     
@@ -232,6 +313,17 @@ if __name__=="__main__":
                                     ,'CO2 emissions (kt)'
                                     ,'Total greenhouse gas emissions (kt of CO2 equivalent)'
                                     ,'CO2 emissions (kt)'
-                                    ,'CO2 emission vs Greenhouse emission by Cluster')
+                                    ,'CO2 emission vs Greenhouse emission by 4 clusters')
+    
+    
+    #fitting
+    # Get the column we want to fit from the dataset
+    data = countries[("World", "Population, total")]
+    
+    #define the parameter which we will use in the function
+    x = data.index.astype("int")
+    y = data.values.astype("float64")
+    
+    fitting_function(x, y, linfunc)
     
     
